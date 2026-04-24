@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JcCodeApp - Editor WYSIWYG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container Principal */
+        .jc-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1e1e2e;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        /* Header */
+        .jc-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            padding: 24px 32px;
+            border-bottom: 2px solid #7c3aed;
+        }
+
+        .jc-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .jc-title h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .jc-badge {
+            background: rgba(124, 58, 237, 0.2);
+            border: 1px solid #7c3aed;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #a78bfa;
+        }
+
+        .jc-version {
+            color: #6b7280;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .jc-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .jc-tag {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #c4b5fd;
+        }
+
+        .jc-tag strong {
+            color: #a78bfa;
+        }
+
+        /* Toolbar */
+        .jc-toolbar {
+            background: #18181b;
+            padding: 12px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .jc-tool-group {
+            display: flex;
+            gap: 4px;
+            padding: 0 8px;
+            border-right: 1px solid #27272a;
+        }
+
+        .jc-tool-group:last-child {
+            border-right: none;
+        }
+
+        .jc-btn {
+            background: #27272a;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #e4e4e7;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .jc-btn:hover {
+            background: #3f3f46;
+            transform: translateY(-1px);
+        }
+
+        .jc-btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .jc-btn-primary:hover {
+            background: #059669;
+        }
+
+        .jc-btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .jc-btn-warning:hover {
+            background: #d97706;
+        }
+
+        .jc-select {
+            background: #27272a;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #e4e4e7;
+            cursor: pointer;
+        }
+
+        /* View Toggle */
+        .jc-view-toggle {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #18181b;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .jc-view-btn {
+            padding: 8px 20px;
+            background: #27272a;
+            border: none;
+            border-radius: 6px;
+            color: #a1a1aa;
+            cursor: pointer;
+        }
+
+        .jc-view-btn.active {
+            background: #7c3aed;
+            color: white;
+        }
+
+        /* Editor Area */
+        .jc-editor-area {
+            display: flex;
+            min-height: 550px;
+            background: #0f0f1a;
+        }
+
+        .jc-panel {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .jc-panel.hidden {
+            display: none;
+        }
+
+        .jc-panel-header {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #27272a;
+            color: #71717a;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .jc-textarea {
+            width: 100%;
+            height: calc(100% - 30px);
+            min-height: 460px;
+            background: #1a1a2e;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            color: #e4e4e7;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 12px;
+            resize: vertical;
+        }
+
+        .jc-editor {
+            background: #ffffff;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            min-height: 460px;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .jc-editor:focus {
+            outline: none;
+            border-color: #7c3aed;
+        }
+
+        /* Status Bar */
+        .jc-status {
+            background: #18181b;
+            padding: 10px 20px;
+            border-top: 1px solid #27272a;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #71717a;
+        }
+
+        .jc-status-left {
+            display: flex;
+            gap: 24px;
+        }
+
+        /* Modal */
+        .jc-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jc-modal.show {
+            display: flex;
+        }
+
+        .jc-modal-content {
+            background: #1e1e2e;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid #27272a;
+        }
+
+        .jc-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #27272a;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .jc-modal-body {
+            padding: 20px;
+        }
+
+        .jc-modal-body input,
+        .jc-modal-body textarea,
+        .jc-modal-body select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background: #0f0f1a;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .jc-modal-body textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .jc-modal-footer {
+            padding: 20px;
+            border-top: 1px solid #27272a;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .jc-modal-footer button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Toast */
+        .jc-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1100;
+            animation: slideIn 0.3s ease;
+        }
+
+        .jc-toast.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="jc-container">
+        <!-- Header -->
+        <div class="jc-header">
+            <div class="jc-title">
+                <div>
+                    <h1>⚡ JcCodeApp</h1>
+                    <span class="jc-badge">WYSIWYG Editor PRO</span>
+                </div>
+                <div class="jc-version">v2.0.8 | Build 2025</div>
+            </div>
+            <div class="jc-tags">
+                <span class="jc-tag">🖥️ <strong>Full Stack Developer</strong> | Web Solutions</span>
+                <span class="jc-tag">🚀 <strong>HTML5 · CSS3 · JavaScript</strong></span>
+                <span class="jc-tag">🎨 <strong>UI/UX Designer</strong></span>
+                <span class="jc-tag">🔧 <strong>Code Craftsman</strong></span>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="jc-toolbar">
+            <div class="jc-tool-group">
+                <button class="jc-btn" id="newBtn">📄 Novo</button>
+                <button class="jc-btn jc-btn-warning" id="openBtn">📂 Abrir</button>
+                <button class="jc-btn jc-btn-primary" id="saveBtn">💾 Salvar</button>
+                <button class="jc-btn" id="exportBtn">📎 Exportar</button>
+            </div>
+            <div class="jc-tool-group">
+                <button class="jc-btn" onclick="execCommand('bold')"><b>N</b></button>
+                <button class="jc-btn" onclick="execCommand('italic')"><i>I</i></button>
+                <button class="jc-btn" onclick="execCommand('underline')"><u>S</u></button>
+            </div>
+            <div class="jc-tool-group">
+                <select class="jc-select" id="fontFamily" onchange="execCommand('fontName', this.value)">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Georgia">Georgia</option>
+                </select>
+                <select class="jc-select" id="fontSize" onchange="execCommand('fontSize', this.value)">
+                    <option value="1">Pequeno</option>
+                    <option value="3" selected>Normal</option>
+                    <option value="5">Grande</option>
+                    <option value="7">Muito Grande</option>
+                </select>
+            </div>
+            <div class="jc-tool-group">
+                <button class="jc-btn" onclick="execCommand('insertUnorderedList')">• Lista</button>
+                <button class="jc-btn" onclick="execCommand('insertOrderedList')">1. Lista</button>
+                <button class="jc-btn" onclick="execCommand('justifyLeft')">⟵</button>
+                <button class="jc-btn" onclick="execCommand('justifyCenter')">⟷</button>
+                <button class="jc-btn" onclick="execCommand('justifyRight')">⟶</button>
+            </div>
+            <div class="jc-tool-group">
+                <button class="jc-btn" onclick="execCommand('removeFormat')">Limpar</button>
+            </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="jc-view-toggle">
+            <button class="jc-view-btn active" id="viewBoth">👁️ Ambos</button>
+            <button class="jc-view-btn" id="viewVisual">📄 Visual</button>
+            <button class="jc-view-btn" id="viewCode">💻 Código</button>
+        </div>
+
+        <!-- Editor Area -->
+        <div class="jc-editor-area">
+            <div class="jc-panel" id="codePanel">
+                <div class="jc-panel-header">📝 CÓDIGO HTML</div>
+                <textarea class="jc-textarea" id="codeEditor" placeholder="Cole seu código HTML aqui..."></textarea>
+            </div>
+            <div class="jc-panel" id="visualPanel">
+                <div class="jc-panel-header">🎨 VISUAL</div>
+                <div class="jc-editor" id="visualEditor" contenteditable="true"></div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="jc-status">
+            <div class="jc-status-left">
+                <span>✅ Sincronizado</span>
+                <span id="wordCount">📝 Palavras: 0</span>
+                <span id="charCount">🔤 Caracteres: 0</span>
+            </div>
+            <div id="fileName">📄 documento.html</div>
+        </div>
+    </div>
+
+    <!-- Modal Abrir -->
+    <div id="openModal" class="jc-modal">
+        <div class="jc-modal-content">
+            <div class="jc-modal-header">📂 Abrir Arquivo</div>
+            <div class="jc-modal-body">
+                <input type="file" id="fileUpload" accept=".html,.htm,.txt">
+                <textarea id="pasteCode" rows="5" placeholder="Ou cole o código HTML aqui..."></textarea>
+            </div>
+            <div class="jc-modal-footer">
+                <button onclick="closeModal('openModal')" style="background:#27272a;color:white;">Cancelar</button>
+                <button onclick="loadFile()" style="background:#7c3aed;color:white;">Carregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Salvar -->
+    <div id="saveModal" class="jc-modal">
+        <div class="jc-modal-content">
+            <div class="jc-modal-header">💾 Salvar Arquivo</div>
+            <div class="jc-modal-body">
+                <input type="text" id="saveFileName" placeholder="Nome do arquivo" value="documento.html">
+                <select id="saveFormat">
+                    <option value="html">HTML (.html)</option>
+                    <option value="txt">Texto (.txt)</option>
+                </select>
+            </div>
+            <div class="jc-modal-footer">
+                <button onclick="closeModal('saveModal')" style="background:#27272a;color:white;">Cancelar</button>
+                <button onclick="saveFile()" style="background:#10b981;color:white;">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos DOM
+        const visualEditor = document.getElementById('visualEditor');
+        const codeEditor = document.getElementById('codeEditor');
+        const wordCountSpan = document.getElementById('wordCount');
+        const charCountSpan = document.getElementById('charCount');
+        const fileNameSpan = document.getElementById('fileName');
+
+        let isSyncing = false;
+        let currentFileName = 'documento.html';
+
+        // Conteúdo inicial
+        const defaultContent = `<h1 style="color:#7c3aed;">Bem-vindo ao JcCodeApp!</h1>
+<p>Este é um editor WYSIWYG profissional e totalmente funcional.</p>
+<h2>Recursos:</h2>
+<ul>
+    <li>Edição visual em tempo real</li>
+    <li>Edição de código HTML</li>
+    <li>Salvar e abrir arquivos</li>
+    <li>Formatação de texto</li>
+</ul>
+<p><strong>Desenvolvido por JcCodeApp</strong> 🚀</p>`;
+
+        // Atualizar contadores
+        function updateCounters() {
+            const text = visualEditor.innerText || '';
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const chars = text.length;
+            wordCountSpan.textContent = `📝 Palavras: ${words}`;
+            charCountSpan.textContent = `🔤 Caracteres: ${chars}`;
+        }
+
+        // Sincronizar Visual -> Código
+        function syncToCode() {
+            if (isSyncing) return;
+            isSyncing = true;
+            try {
+                let html = visualEditor.innerHTML;
+                if (html === '<br>') html = '';
+                codeEditor.value = html;
+                updateCounters();
+            } catch(e) {
+                console.error('Erro:', e);
+            } finally {
+                setTimeout(() => { isSyncing = false; }, 10);
+            }
+        }
+
+        // Sincronizar Código -> Visual
+        function syncToVisual() {
+            if (isSyncing) return;
+            isSyncing = true;
+            try {
+                let html = codeEditor.value;
+                if (!html) html = '<br>';
+                visualEditor.innerHTML = html;
+                updateCounters();
+            } catch(e) {
+                console.error('Erro:', e);
+            } finally {
+                setTimeout(() => { isSyncing = false; }, 10);
+            }
+        }
+
+        // Executar comando de formatação
+        window.execCommand = function(command, value = null) {
+            visualEditor.focus();
+            if (value) {
+                document.execCommand(command, false, value);
+            } else {
+                document.execCommand(command, false, null);
+            }
+            syncToCode();
+        };
+
+        // Mostrar notificação
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'jc-toast';
+            if (isError) toast.classList.add('error');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // Modal functions
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Carregar arquivo
+        function loadFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const pasteCode = document.getElementById('pasteCode');
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    codeEditor.value = e.target.result;
+                    syncToVisual();
+                    currentFileName = file.name;
+                    fileNameSpan.textContent = `📄 ${currentFileName}`;
+                    showToast(`✅ Arquivo "${file.name}" carregado!`);
+                    closeModal('openModal');
+                    fileInput.value = '';
+                    pasteCode.value = '';
+                };
+                reader.onerror = function() {
+                    showToast('❌ Erro ao ler arquivo!', true);
+                };
+                reader.readAsText(file);
+            } else if (pasteCode.value.trim()) {
+                codeEditor.value = pasteCode.value;
+                syncToVisual();
+                showToast('✅ Código carregado com sucesso!');
+                closeModal('openModal');
+                fileInput.value = '';
+                pasteCode.value = '';
+            } else {
+                showToast('⚠️ Selecione um arquivo ou cole o código!', true);
+            }
+        }
+
+        // Salvar arquivo
+        function saveFile() {
+            const fileName = document.getElementById('saveFileName').value;
+            const format = document.getElementById('saveFormat').value;
+            const content = format === 'html' ? codeEditor.value : visualEditor.innerText;
+            
+            if (!content.trim()) {
+                showToast('⚠️ Não há conteúdo para salvar!', true);
+                return;
+            }
+            
+            const blob = new Blob([content], { type: format === 'html' ? 'text/html' : 'text/plain' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            const finalName = fileName.endsWith(`.${format}`) ? fileName : `${fileName}.${format}`;
+            link.download = finalName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            if (format === 'html') {
+                currentFileName = finalName;
+                fileNameSpan.textContent = `📄 ${currentFileName}`;
+            }
+            
+            showToast(`💾 Arquivo salvo como "${finalName}"!`);
+            closeModal('saveModal');
+        }
+
+        // Exportar HTML
+        function exportHTML() {
+            const content = codeEditor.value;
+            if (!content.trim()) {
+                showToast('⚠️ Não há conteúdo para exportar!', true);
+                return;
+            }
+            
+            const blob = new Blob([content], { type: 'text/html' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            const date = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.download = `JcCodeApp_${date}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('📎 HTML exportado com sucesso!');
+        }
+
+        // Novo documento
+        function newDocument() {
+            if (confirm('📄 Criar novo documento? O conteúdo atual será perdido!')) {
+                codeEditor.value = '';
+                syncToVisual();
+                currentFileName = 'documento.html';
+                fileNameSpan.textContent = `📄 ${currentFileName}`;
+                showToast('✨ Novo documento criado!');
+            }
+        }
+
+        // Mudar visualização
+        function setViewMode(mode) {
+            const codePanel = document.getElementById('codePanel');
+            const visualPanel = document.getElementById('visualPanel');
+            const viewBoth = document.getElementById('viewBoth');
+            const viewVisual = document.getElementById('viewVisual');
+            const viewCode = document.getElementById('viewCode');
+            
+            if (mode === 'both') {
+                codePanel.classList.remove('hidden');
+                visualPanel.classList.remove('hidden');
+                viewBoth.classList.add('active');
+                viewVisual.classList.remove('active');
+                viewCode.classList.remove('active');
+            } else if (mode === 'visual') {
+                codePanel.classList.add('hidden');
+                visualPanel.classList.remove('hidden');
+                viewVisual.classList.add('active');
+                viewBoth.classList.remove('active');
+                viewCode.classList.remove('active');
+            } else {
+                codePanel.classList.remove('hidden');
+                visualPanel.classList.add('hidden');
+                viewCode.classList.add('active');
+                viewBoth.classList.remove('active');
+                viewVisual.classList.remove('active');
+            }
+        }
+
+        // Eventos
+        visualEditor.addEventListener('input', syncToCode);
+        visualEditor.addEventListener('keyup', syncToCode);
+        codeEditor.addEventListener('input', syncToVisual);
+        codeEditor.addEventListener('blur', syncToVisual);
+
+        // Paste no editor visual
+        visualEditor.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text);
+            syncToCode();
+        });
+
+        // Botões
+        document.getElementById('newBtn').addEventListener('click', newDocument);
+        document.getElementById('openBtn').addEventListener('click', () => openModal('openModal'));
+        document.getElementById('saveBtn').addEventListener('click', () => openModal('saveModal'));
+        document.getElementById('exportBtn').addEventListener('click', exportHTML);
+        
+        document.getElementById('viewBoth').addEventListener('click', () => setViewMode('both'));
+        document.getElementById('viewVisual').addEventListener('click', () => setViewMode('visual'));
+        document.getElementById('viewCode').addEventListener('click', () => setViewMode('code'));
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            if (event.target.classList.contains('jc-modal')) {
+                event.target.classList.remove('show');
+            }
+        };
+
+        // Carregar conteúdo salvo do localStorage
+        const savedContent = localStorage.getItem('jcCodeApp_content');
+        if (savedContent) {
+            codeEditor.value = savedContent;
+            syncToVisual();
+            const savedName = localStorage.getItem('jcCodeApp_filename');
+            if (savedName) {
+                currentFileName = savedName;
+                fileNameSpan.textContent = `📄 ${currentFileName}`;
+            }
+        } else {
+            codeEditor.value = defaultContent;
+            syncToVisual();
+        }
+
+        // Auto-save a cada 10 segundos
+        setInterval(() => {
+            localStorage.setItem('jcCodeApp_content', codeEditor.value);
+            localStorage.setItem('jcCodeApp_filename', currentFileName);
+        }, 10000);
+
+        // Inicializar contadores
+        updateCounters();
+    </script>
+</body>
+</html>
