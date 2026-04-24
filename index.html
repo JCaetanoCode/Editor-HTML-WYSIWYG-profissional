@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JcCodeApp - Editor WYSIWYG</title>
     <style>
         * {
@@ -28,10 +28,10 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
         }
 
-        /* Header */
+        /* Header - Versão Compacta sem Ícone */
         .jc-header {
             background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-            padding: 24px 32px;
+            padding: 16px 24px;
             border-bottom: 2px solid #7c3aed;
         }
 
@@ -40,11 +40,17 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .jc-title-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .jc-title h1 {
-            font-size: 2rem;
+            font-size: 1.6rem;
             background: linear-gradient(135deg, #7c3aed, #a78bfa);
             -webkit-background-clip: text;
             background-clip: text;
@@ -55,49 +61,34 @@
             background: rgba(124, 58, 237, 0.2);
             border: 1px solid #7c3aed;
             border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 12px;
+            padding: 2px 10px;
+            font-size: 11px;
             color: #a78bfa;
         }
 
         .jc-version {
             color: #6b7280;
             font-family: monospace;
-            font-size: 12px;
-        }
-
-        .jc-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .jc-tag {
-            background: rgba(124, 58, 237, 0.1);
-            padding: 6px 14px;
+            font-size: 11px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 13px;
-            color: #c4b5fd;
-        }
-
-        .jc-tag strong {
-            color: #a78bfa;
         }
 
         /* Toolbar */
         .jc-toolbar {
             background: #18181b;
-            padding: 12px 20px;
+            padding: 10px 16px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             border-bottom: 1px solid #27272a;
         }
 
         .jc-tool-group {
             display: flex;
             gap: 4px;
-            padding: 0 8px;
+            padding: 0 6px;
             border-right: 1px solid #27272a;
         }
 
@@ -109,10 +100,10 @@
             background: #27272a;
             border: none;
             border-radius: 6px;
-            padding: 6px 12px;
+            padding: 5px 10px;
             color: #e4e4e7;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             transition: all 0.2s;
         }
 
@@ -143,27 +134,29 @@
             background: #27272a;
             border: none;
             border-radius: 6px;
-            padding: 6px 12px;
+            padding: 5px 10px;
             color: #e4e4e7;
             cursor: pointer;
+            font-size: 12px;
         }
 
         /* View Toggle */
         .jc-view-toggle {
             display: flex;
-            gap: 8px;
-            padding: 12px 20px;
+            gap: 6px;
+            padding: 10px 16px;
             background: #18181b;
             border-bottom: 1px solid #27272a;
         }
 
         .jc-view-btn {
-            padding: 8px 20px;
+            padding: 6px 16px;
             background: #27272a;
             border: none;
             border-radius: 6px;
             color: #a1a1aa;
             cursor: pointer;
+            font-size: 12px;
         }
 
         .jc-view-btn.active {
@@ -180,7 +173,7 @@
 
         .jc-panel {
             flex: 1;
-            padding: 20px;
+            padding: 16px;
         }
 
         .jc-panel.hidden {
@@ -188,11 +181,11 @@
         }
 
         .jc-panel-header {
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #27272a;
             color: #71717a;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
         }
@@ -229,17 +222,17 @@
         /* Status Bar */
         .jc-status {
             background: #18181b;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-top: 1px solid #27272a;
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 11px;
             color: #71717a;
         }
 
         .jc-status-left {
             display: flex;
-            gap: 24px;
+            gap: 20px;
         }
 
         /* Modal */
@@ -269,9 +262,9 @@
         }
 
         .jc-modal-header {
-            padding: 20px;
+            padding: 16px 20px;
             border-bottom: 1px solid #27272a;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
         }
@@ -298,7 +291,7 @@
         }
 
         .jc-modal-footer {
-            padding: 20px;
+            padding: 16px 20px;
             border-top: 1px solid #27272a;
             display: flex;
             justify-content: flex-end;
@@ -319,10 +312,11 @@
             right: 20px;
             background: #10b981;
             color: white;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 8px;
             z-index: 1100;
             animation: slideIn 0.3s ease;
+            font-size: 13px;
         }
 
         .jc-toast.error {
@@ -343,20 +337,14 @@
 </head>
 <body>
     <div class="jc-container">
-        <!-- Header -->
+        <!-- Header Compacto sem Ícone -->
         <div class="jc-header">
             <div class="jc-title">
-                <div>
+                <div class="jc-title-left">
                     <h1>⚡ JcCodeApp</h1>
                     <span class="jc-badge">WYSIWYG Editor PRO</span>
                 </div>
                 <div class="jc-version">v2.0.8 | Build 2025</div>
-            </div>
-            <div class="jc-tags">
-                <span class="jc-tag">🖥️ <strong>Full Stack Developer</strong> | Web Solutions</span>
-                <span class="jc-tag">🚀 <strong>HTML5 · CSS3 · JavaScript</strong></span>
-                <span class="jc-tag">🎨 <strong>UI/UX Designer</strong></span>
-                <span class="jc-tag">🔧 <strong>Code Craftsman</strong></span>
             </div>
         </div>
 
